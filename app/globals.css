@@ -1,26 +1,220 @@
 @import "tailwindcss";
 
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  /* Design System Colors - Default theme fallbacks */
+  --dream-pink: #FFD1DC;
+  --dream-red: #FF004D;
+  --dream-cream: #FDFBF7;
+  --dream-text: #4A0E18;
+  --receipt-ink: #1A1A1A;
+  
+  /* Theme variables with fallbacks */
+  --theme-primary: var(--dream-red);
+  --theme-secondary: var(--dream-pink);
+  --theme-background: var(--dream-pink);
+  --theme-text: var(--dream-text);
+  --theme-text-muted: rgba(74, 14, 24, 0.6);
+  --theme-card-bg: rgba(255, 255, 255, 0.4);
+  --theme-card-border: rgba(255, 255, 255, 0.6);
+  --theme-glow: rgba(255, 0, 77, 0.4);
+  --theme-button-text: white;
+  
+  --background: var(--theme-background);
+  --foreground: var(--theme-text);
 }
 
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
+  --color-dream-pink: var(--dream-pink);
+  --color-dream-red: var(--dream-red);
+  --color-dream-cream: var(--dream-cream);
+  --color-dream-text: var(--dream-text);
+  --color-receipt-ink: var(--receipt-ink);
+  --font-sans: var(--font-dm-sans);
   --font-mono: var(--font-geist-mono);
+  --font-heading: var(--font-shaping-heart);
+  --font-receipt: var(--font-space-mono);
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+* {
+  box-sizing: border-box;
+}
+
+html, body {
+  overflow-x: hidden;
+  overscroll-behavior: none;
 }
 
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  background: var(--theme-background);
+  color: var(--theme-text);
+  font-family: var(--font-dm-sans), -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  min-height: 100dvh;
+  transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+/* Glassmorphism Card */
+.glass-card {
+  background: var(--theme-card-bg);
+  -webkit-backdrop-filter: blur(var(--theme-blur, 12px));
+  backdrop-filter: blur(var(--theme-blur, 12px));
+  border: 1px solid var(--theme-card-border);
+  box-shadow: var(--theme-shadow, 0 4px 6px -1px rgba(0, 0, 0, 0.1)), 
+              inset 0 0 20px rgba(255, 255, 255, 0.2);
+  border-radius: 24px;
+  transition: background 0.3s ease, border-color 0.3s ease;
+}
+
+/* Primary Button */
+.btn-primary {
+  background: var(--theme-gradient-button, linear-gradient(180deg, #FF3366 0%, #FF004D 50%, #CC003D 100%));
+  color: var(--theme-button-text, white);
+  border-radius: 9999px;
+  padding: 12px 32px;
+  font-weight: 600;
+  box-shadow: var(--theme-effect-glow, 0 0 20px rgba(255, 0, 77, 0.4));
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.btn-primary:hover {
+  transform: scale(1.05);
+  box-shadow: var(--theme-effect-glow, 0 0 30px rgba(255, 0, 77, 0.6));
+}
+
+/* Noise overlay for film grain effect */
+.noise-overlay {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 100;
+  opacity: 0.03;
+  mix-blend-mode: overlay;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)'/%3E%3C/svg%3E");
+}
+
+/* Receipt styling */
+.receipt {
+  font-family: var(--font-space-mono), 'Courier New', monospace;
+  background: #FDFBF7;
+  color: #1A1A1A;
+  padding: 24px;
+  border-radius: 4px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+}
+
+/* Typography utility classes */
+.font-heading {
+  font-family: var(--font-shaping-heart), Georgia, serif;
+}
+
+.font-receipt {
+  font-family: var(--font-space-mono), 'Courier New', monospace;
+}
+
+/* Jelly Button Animation - Base */
+.jelly-btn {
+  position: relative;
+  transform: scale3d(1, 1, 1);
+  transition: none !important;
+}
+
+.jelly-btn::before,
+.jelly-btn::after {
+  content: "";
+  width: 70%;
+  height: 2px;
+  position: absolute;
+  filter: blur(1px);
+  border-radius: 50%;
+  left: 15%;
+  pointer-events: none;
+}
+
+.jelly-btn::before {
+  top: 7px;
+  background-color: rgba(250, 250, 250, 0.678);
+}
+
+.jelly-btn::after {
+  bottom: 7px;
+  background-color: rgba(250, 250, 250, 0.137);
+}
+
+.jelly-btn:active {
+  animation: jelly-animation 0.6s both !important;
+}
+
+@keyframes jelly-animation {
+  0% {
+    transform: scale3d(1, 1, 1);
+  }
+  25% {
+    transform: scale3d(1.25, 0.75, 1);
+  }
+  35% {
+    transform: scale3d(0.75, 1.25, 1);
+  }
+  45% {
+    transform: scale3d(1.15, 0.85, 1);
+  }
+  60% {
+    transform: scale3d(0.95, 1.05, 1);
+  }
+  70% {
+    transform: scale3d(1.05, 0.95, 1);
+  }
+  100% {
+    transform: scale3d(1, 1, 1);
+  }
+}
+
+/* Primary Button (YES) */
+.btn-primary {
+  background: linear-gradient(180deg, #FF3366 0%, #FF004D 50%, #CC003D 100%);
+  color: white;
+  border-radius: 9999px;
+  padding: 12px 32px;
+  font-weight: 600;
+  box-shadow: 
+    0px 10px 10px #ffc6d9 inset,
+    0px 3px 8px 0px rgba(255, 255, 255, 0.21),
+    0px -10px 10px #cc003d inset,
+    0 0 20px rgba(255, 0, 77, 0.4);
+  position: relative;
+  transform: scale3d(1, 1, 1);
+}
+
+.btn-primary:hover {
+  box-shadow: 
+    0px 10px 10px #ffc6d9 inset,
+    0px 3px 8px 0px rgba(255, 255, 255, 0.21),
+    0px -10px 10px #cc003d inset,
+    0 0 30px rgba(255, 0, 77, 0.6);
+}
+
+/* Ghost Button (NO) - DEBUG MODE: MAXIMUM VISIBILITY */
+.btn-ghost {
+  background: #FF004D !important;
+  color: #FFFFFF !important;
+  border: 5px solid #000000 !important;
+  border-radius: 12px;
+  padding: 20px 40px !important;
+  font-weight: 900 !important;
+  font-size: 24px !important;
+  position: relative;
+  transform: scale3d(1, 1, 1);
+  box-shadow: 
+    0 0 50px rgba(255, 0, 77, 1),
+    0 0 100px rgba(0, 0, 0, 0.8) !important;
+  outline: 10px dashed yellow !important;
+  outline-offset: 5px !important;
+}
+
+.btn-ghost:hover {
+  background: #000000 !important;
+  color: #FF004D !important;
+  border-color: #FF004D !important;
+  box-shadow: 
+    0 0 80px rgba(255, 0, 77, 1) !important;
 }
