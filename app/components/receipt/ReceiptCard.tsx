@@ -206,26 +206,55 @@ export function ReceiptCard() {
         { type: 'image/png' }
       );
 
-      // Check if Web Share API with files is available
-      const canShareFiles = typeof navigator !== 'undefined' && 
-                            'share' in navigator && 
-                            'canShare' in navigator &&
-                            navigator.canShare({ files: [file] });
-
-      if (canShareFiles) {
-        // Share the image file
-        await navigator.share({
-          title: 'Val Wrapped 💕',
-          text: shareText,
-          files: [file],
-        });
-        
-        // Haptic feedback on successful share
-        if (navigator.vibrate) {
-          navigator.vibrate(50);
+      // Check if Web Share API is available
+      if (typeof navigator !== 'undefined' && 'share' in navigator) {
+        try {
+          // Try to share with file
+          if ('canShare' in navigator && navigator.canShare({ files: [file] })) {
+            await navigator.share({
+              title: 'Val Wrapped 💕',
+              text: shareText,
+              files: [file],
+            });
+          } else {
+            // Share without file (just text)
+            await navigator.share({
+              title: 'Val Wrapped 💕',
+              text: shareText,
+            });
+          }
+          
+          // Haptic feedback on successful share
+          if (navigator.vibrate) {
+            navigator.vibrate(50);
+          }
+          
+          setShowCopied(true);
+          setTimeout(() => setShowCopied(false), 2000);
+        } catch (shareError: unknown) {
+          // If share fails or is cancelled, download image instead
+          if (shareError instanceof Error && shareError.name !== 'AbortError') {
+            console.log('Share failed, downloading instead:', shareError);
+            // Download fallback
+            const url = URL.createObjectURL(blob);
+            const link = document.createElement('a');
+            link.href = url;
+            link.download = `val-wrapped-${displayRecipient.toLowerCase().replace(/\s+/g, '-')}.png`;
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            URL.revokeObjectURL(url);
+            
+            setShowCopied(true);
+            setTimeout(() => setShowCopied(false), 2000);
+            
+            if ('vibrate' in navigator) {
+              (navigator as Navigator & { vibrate: (pattern: number | number[]) => boolean }).vibrate(50);
+            }
+          }
         }
       } else {
-        // Fallback: Download the image instead
+        // No Web Share API - download the image
         const url = URL.createObjectURL(blob);
         const link = document.createElement('a');
         link.href = url;
@@ -235,22 +264,16 @@ export function ReceiptCard() {
         document.body.removeChild(link);
         URL.revokeObjectURL(url);
         
-        // Show message that image was downloaded
         setShowCopied(true);
         setTimeout(() => setShowCopied(false), 2000);
         
-        // Haptic feedback
-        if (navigator.vibrate) {
-          navigator.vibrate(50);
+        if ('vibrate' in navigator) {
+          (navigator as Navigator & { vibrate: (pattern: number | number[]) => boolean }).vibrate(50);
         }
       }
     } catch (error: unknown) {
-      // User cancelled or error occurred
-      if (error instanceof Error && error.name === 'AbortError') {
-        // User closed the share dialog, just return
-        return;
-      }
       console.error('Share failed:', error);
+      alert('Failed to share. Please try the download option instead.');
     } finally {
       setIsSharing(false);
     }
@@ -261,12 +284,13 @@ export function ReceiptCard() {
       <Confetti />
       
       <motion.div
-        className="fixed inset-0 flex items-center justify-center p-4 overflow-auto"
+        className="min-h-screen px-4 py-20"
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         transition={{ duration: 0.5 }}
         style={themeVars}
       >
+        <div className="w-full flex flex-col items-center">
         <motion.div
           className="w-full max-w-sm"
           initial={{ y: 100, opacity: 0, scale: 0.8 }}
@@ -471,6 +495,7 @@ export function ReceiptCard() {
             Create your own link?
           </motion.button>
         </motion.div>
+        </div>
       </motion.div>
     </>
   );

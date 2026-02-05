@@ -7,7 +7,7 @@ import { AnimatedBackground } from './components/canvas/AnimatedBackground';
 
 export default function Home() {
   return (
-    <main className="min-h-dvh overflow-hidden">
+    <main className="min-h-screen overflow-auto">
       {/* Animated Background */}
       <AnimatedBackground />
 

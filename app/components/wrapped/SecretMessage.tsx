@@ -104,7 +104,7 @@ export function SecretMessage({ message }: SecretMessageProps) {
             >
               💌
             </motion.div>
-            <p className="text-white/80 font-serif italic text-lg">
+            <p className="text-white/80 font-serif italic text-md">
               A secret message awaits...
             </p>
           </div>

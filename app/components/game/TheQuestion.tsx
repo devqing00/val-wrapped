@@ -1,9 +1,8 @@
 'use client';
 
 import { useRef, useState, useCallback, useEffect, useMemo } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
+import { AnimatePresence, motion } from 'framer-motion';
 import { GlassCard } from '../ui/GlassCard';
-import { FallingYesButtons } from './FallingYesButtons';
 import { useStore } from '../../store/useStore';
 import { DecryptedText } from '../ui/DecryptedText';
 import { FaultyTerminal } from '../ui/FaultyTerminal';
@@ -71,42 +70,26 @@ const SENDER_UPDATES = [
 // Chaos events for unexpected twists
 type ChaosEvent = 'none' | 'swap' | 'captcha' | 'math' | 'tiny' | 'reverse' | 'fake-crash' | 'jumpscare' | 'confession' | 'hacked';
 
-interface SpawnedButton {
-  id: number;
-  x: number;
-}
-
-// Particle component for breaking hearts
-const BreakingHearts = ({ x, y, heartKey }: { x: number; y: number; heartKey: number }) => {
-  const hearts = useMemo(() => Array.from({ length: 8 }, (_, i) => ({
-    id: i,
-    angle: (i * 45) * (Math.PI / 180),
-    delay: (i * 0.02), // deterministic delay based on index
-    rotateDir: i % 2 === 0 ? 360 : -360 // deterministic rotation
-  })), []);
-
+// Simple CSS-based heart particle (no Framer Motion)
+const HeartParticle = ({ x, y, id }: { x: number; y: number; id: number }) => {
+  const angle = (id % 8) * 45 * (Math.PI / 180);
+  const endX = x + Math.cos(angle) * 100;
+  const endY = y + Math.sin(angle) * 100 + 50;
+  
   return (
-    <div className="pointer-events-none fixed inset-0 z-50">
-      {hearts.map(heart => (
-        <motion.div
-          key={`${heartKey}-${heart.id}`}
-          className="absolute text-2xl"
-          initial={{ x, y, opacity: 1, scale: 1, rotate: 0 }}
-          animate={{
-            x: x + Math.cos(heart.angle) * 150,
-            y: y + Math.sin(heart.angle) * 150 + 100,
-            opacity: 0,
-            scale: 0.5,
-            rotate: heart.rotateDir
-          }}
-          transition={{ duration: 0.8, delay: heart.delay, ease: "easeOut" }}
-        >
-          💔
-        </motion.div>
-      ))}
+    <div
+      className="fixed text-xl pointer-events-none animate-particle-burst"
+      style={{
+        left: x,
+        top: y,
+        '--end-x': `${endX - x}px`,
+        '--end-y': `${endY - y}px`,
+      } as React.CSSProperties}
+    >
+      💔
     </div>
   );
-}
+};
 
 // Captcha modal
 const CaptchaChallenge = ({ onSolve, onSkip }: { onSolve: () => void; onSkip: () => void }) => (
@@ -114,18 +97,18 @@ const CaptchaChallenge = ({ onSolve, onSkip }: { onSolve: () => void; onSkip: ()
     initial={{ opacity: 0, scale: 0.8 }}
     animate={{ opacity: 1, scale: 1 }}
     exit={{ opacity: 0, scale: 0.8 }}
-    className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm"
+    className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm px-4"
   >
-    <div className="bg-white rounded-2xl p-6 max-w-sm mx-4 text-center shadow-2xl relative">
+    <div className="bg-white rounded-xl p-4 max-w-xs w-full text-center shadow-2xl relative">
       <button
         onClick={onSkip}
-        className="absolute top-4 right-4 text-gray-400 hover:text-gray-600 text-2xl leading-none"
+        className="absolute top-2 right-2 text-gray-400 hover:text-gray-600 text-xl leading-none"
       >
         ×
       </button>
-      <h3 className="text-lg font-bold text-gray-800 mb-4">🤖 Prove you&apos;re not a heartbreaker</h3>
-      <div className="bg-gray-100 p-4 rounded-lg mb-4 relative overflow-hidden">
-        <div className="text-2xl font-bold tracking-[0.5em] text-gray-700 
+      <h3 className="text-sm font-bold text-gray-800 mb-3">🤖 Prove you&apos;re not a heartbreaker</h3>
+      <div className="bg-gray-100 p-3 rounded-lg mb-3 relative overflow-hidden">
+        <div className="text-xl font-bold tracking-[0.4em] text-gray-700 
           [text-shadow:2px_2px_0_#fff,-2px_-2px_0_#fff,2px_-2px_0_#fff,-2px_2px_0_#fff]
           transform skew-x-[-5deg] italic select-none"
           style={{ fontFamily: 'Comic Sans MS, cursive' }}
@@ -139,10 +122,10 @@ const CaptchaChallenge = ({ onSolve, onSkip }: { onSolve: () => void; onSkip: ()
           </svg>
         </div>
       </div>
-      <p className="text-sm text-gray-500 mb-4">Type what you see:</p>
+      <p className="text-xs text-gray-500 mb-3">Type what you see:</p>
       <button 
         onClick={onSolve}
-        className="jelly-btn w-full py-3 bg-gradient-to-r from-pink-500 to-rose-500 text-white rounded-xl font-semibold hover:scale-105 transition-transform"
+        className="jelly-btn w-full py-2 text-sm bg-gradient-to-r from-pink-500 to-rose-500 text-white rounded-lg font-semibold hover:scale-105 transition-transform"
       >
         YES ✓
       </button>
@@ -174,23 +157,23 @@ const MathChallenge = ({ onSolve, onWrong, onSkip }: { onSolve: () => void; onWr
       initial={{ opacity: 0, scale: 0.8 }}
       animate={{ opacity: 1, scale: 1 }}
       exit={{ opacity: 0, scale: 0.8 }}
-      className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm"
+      className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm px-4"
     >
-      <div className="bg-white rounded-2xl p-6 max-w-sm mx-4 text-center shadow-2xl relative">
+      <div className="bg-white rounded-xl p-4 max-w-xs w-full text-center shadow-2xl relative">
         <button
           onClick={onSkip}
-          className="absolute top-4 right-4 text-gray-400 hover:text-gray-600 text-2xl leading-none"
+          className="absolute top-2 right-2 text-gray-400 hover:text-gray-600 text-xl leading-none"
         >
           ×
         </button>
-        <h3 className="text-lg font-bold text-gray-800 mb-4">🧮 Quick Math!</h3>
-        <div className="text-4xl font-bold mb-2">1 + 1 = ?</div>
+        <h3 className="text-sm font-bold text-gray-800 mb-3">🧮 Quick Math!</h3>
+        <div className="text-3xl font-bold mb-2">1 + 1 = ?</div>
         <AnimatePresence>
           {showHint && (
             <motion.p 
               initial={{ opacity: 0, y: -10 }}
               animate={{ opacity: 1, y: 0 }}
-              className="text-sm text-pink-500 mb-4"
+              className="text-xs text-pink-500 mb-3"
             >
               (Hint: The answer is also what you should click 😉)
             </motion.p>
@@ -199,15 +182,15 @@ const MathChallenge = ({ onSolve, onWrong, onSkip }: { onSolve: () => void; onWr
         <input
           type="text"
           value={answer}
-          onChange={(e) => setAnswer(e.target.value)}
+          onChange={(e) => setAnswer('YES')}
           onKeyDown={(e) => e.key === 'Enter' && handleSubmit()}
-          className="w-full px-4 py-2 border-2 border-pink-300 rounded-xl mb-4 text-center text-xl focus:outline-none focus:border-pink-500"
+          className="w-full px-3 py-2 border-2 border-pink-300 rounded-lg mb-3 text-center text-lg focus:outline-none focus:border-pink-500"
           placeholder="Your answer..."
           autoFocus
         />
         <button 
           onClick={handleSubmit}
-          className="jelly-btn w-full py-3 bg-gradient-to-r from-pink-500 to-rose-500 text-white rounded-xl font-semibold"
+          className="jelly-btn w-full py-2 text-sm bg-gradient-to-r from-pink-500 to-rose-500 text-white rounded-lg font-semibold"
         >
           Submit 📝
         </button>
@@ -252,31 +235,31 @@ const FakeCrash = ({ onDismiss }: { onDismiss: () => void }) => {
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
       onClick={handleClick}
-      className={`fixed inset-0 z-50 bg-[#0078D7] flex items-center justify-center ${canDismiss ? 'cursor-pointer' : 'cursor-wait'}`}
+      className={`fixed inset-0 z-50 bg-[#0078D7] flex items-center justify-center px-4 ${canDismiss ? 'cursor-pointer' : 'cursor-wait'}`}
     >
-      <div className="text-white p-8 max-w-2xl">
-        <div className="text-[120px] md:text-[180px] leading-none mb-6">:(</div>
-        <h2 className="text-xl md:text-2xl mb-4">Your device ran into a problem and needs to restart.</h2>
-        <p className="text-base md:text-lg mb-6 opacity-90">
+      <div className="text-white p-6 max-w-md">
+        <div className="text-[80px] md:text-[120px] leading-none mb-4">:(</div>
+        <h2 className="text-lg md:text-xl mb-3">Your device ran into a problem and needs to restart.</h2>
+        <p className="text-sm md:text-base mb-4 opacity-90">
           We&apos;re just collecting some error info, and then we&apos;ll restart for you.
         </p>
-        <div className="mb-4">
-          <span className="text-lg">{Math.min(100, Math.round(progress))}% complete</span>
+        <div className="mb-3">
+          <span className="text-base">{Math.min(100, Math.round(progress))}% complete</span>
         </div>
-        <div className="space-y-2 text-sm opacity-80">
+        <div className="space-y-1 text-xs opacity-80">
           <p>For more information about this issue and possible fixes, visit</p>
-          <p className="font-mono">https://www.justsayyes.com/stopcode</p>
+          <p className="font-mono text-xs">https://www.justsayyes.com/stopcode</p>
         </div>
-        <div className="mt-6 space-y-1 text-sm opacity-70">
+        <div className="mt-4 space-y-1 text-xs opacity-70">
           <p>If you call a support person, give them this info:</p>
-          <p className="font-mono">Stop code: TOO_MANY_REJECTION_ATTEMPTS</p>
-          <p className="font-mono">What failed: heart.exe</p>
+          <p className="font-mono text-xs">Stop code: TOO_MANY_REJECTION_ATTEMPTS</p>
+          <p className="font-mono text-xs">What failed: heart.exe</p>
         </div>
         {canDismiss && (
           <motion.p 
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
-            className="mt-8 text-sm opacity-60"
+            className="mt-6 text-xs opacity-60"
           >
             Click anywhere to recover... (or just say YES 💕)
           </motion.p>
@@ -325,9 +308,9 @@ const HackedScreen = ({ onDismiss }: { onDismiss: () => void }) => {
       <div className="absolute inset-0 bg-black/60" />
       
       {/* Content */}
-      <div className="relative z-10 flex flex-col items-center justify-center h-full p-6 text-center">
+      <div className="relative z-10 flex flex-col items-center justify-center h-full p-4 text-center">
         <motion.div 
-          className="text-green-400 text-xs md:text-sm font-mono mb-4 opacity-80"
+          className="text-green-400 text-[10px] md:text-xs font-mono mb-3 opacity-80"
           animate={{ opacity: [0.5, 1, 0.5] }}
           transition={{ repeat: Infinity, duration: 2 }}
         >
@@ -338,7 +321,7 @@ const HackedScreen = ({ onDismiss }: { onDismiss: () => void }) => {
           <motion.div
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
-            className="text-green-500 text-sm md:text-base font-mono mb-3"
+            className="text-green-500 text-xs md:text-sm font-mono mb-2"
           >
             <DecryptedText 
               text="ACCESSING HEART DATABASE..."
@@ -355,7 +338,7 @@ const HackedScreen = ({ onDismiss }: { onDismiss: () => void }) => {
           <motion.div
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
-            className="text-green-400 text-base md:text-lg font-mono mb-3"
+            className="text-green-400 text-sm md:text-base font-mono mb-2"
           >
             <DecryptedText 
               text="FIREWALL BYPASSED... ✓"
@@ -372,7 +355,7 @@ const HackedScreen = ({ onDismiss }: { onDismiss: () => void }) => {
           <motion.div
             initial={{ opacity: 0, scale: 0.8 }}
             animate={{ opacity: 1, scale: 1 }}
-            className="text-green-300 text-lg md:text-2xl font-mono font-bold mb-6"
+            className="text-green-300 text-base md:text-xl font-mono font-bold mb-4"
           >
             <DecryptedText 
               text="[LOVE.exe INJECTED SUCCESSFULLY]"
@@ -390,7 +373,7 @@ const HackedScreen = ({ onDismiss }: { onDismiss: () => void }) => {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             onClick={onDismiss}
-            className="jelly-btn px-8 py-3 bg-green-500 text-black rounded-lg font-mono font-bold hover:bg-green-400 transition-colors"
+            className="jelly-btn px-6 py-2 text-sm bg-green-500 text-black rounded-lg font-mono font-bold hover:bg-green-400 transition-colors"
           >
             <span className="mr-2">&gt;</span>
             <DecryptedText 
@@ -405,7 +388,7 @@ const HackedScreen = ({ onDismiss }: { onDismiss: () => void }) => {
         )}
         
         <motion.p 
-          className="mt-6 text-green-600 text-xs font-mono opacity-60"
+          className="mt-4 text-green-600 text-[10px] font-mono opacity-60"
           animate={{ opacity: [0.3, 0.6, 0.3] }}
           transition={{ repeat: Infinity, duration: 3 }}
         >
@@ -428,24 +411,23 @@ const Jumpscare = ({ onDismiss }: { onDismiss: () => void }) => {
       initial={{ scale: 5, opacity: 0 }}
       animate={{ scale: 1, opacity: 1 }}
       exit={{ scale: 0, opacity: 0 }}
-      className="fixed inset-0 z-50 bg-pink-500 flex items-center justify-center"
+      className="fixed inset-0 z-50 bg-pink-500 flex items-center justify-center px-4"
     >
       <div className="text-center">
         <motion.div 
-          className="text-[150px]"
+          className="text-[100px]"
           animate={{ rotate: [0, -10, 10, -10, 10, 0] }}
           transition={{ duration: 0.5 }}
         >
           💕
         </motion.div>
-        <div className="text-white text-3xl font-bold">SAY YES ALREADY!</div>
+        <div className="text-white text-2xl font-bold">SAY YES ALREADY!</div>
       </div>
     </motion.div>
   );
 };
 
 export function TheQuestion() {
-  const [spawnedButtons, setSpawnedButtons] = useState<SpawnedButton[]>([]);
   const [noTextIndex, setNoTextIndex] = useState(0);
   const [noButtonScale, setNoButtonScale] = useState(1);
   const [isShaking, setIsShaking] = useState(false);
@@ -458,7 +440,6 @@ export function TheQuestion() {
   const [confessionMode, setConfessionMode] = useState(false);
   const [clickCount, setClickCount] = useState(0);
   
-  const spawnCounter = useRef(0);
   const particleCounter = useRef(0);
   
   const senderName = useStore((state) => state.senderName);
@@ -477,11 +458,16 @@ export function TheQuestion() {
     const rect = (e.target as HTMLElement).getBoundingClientRect();
     const x = rect.left + rect.width / 2;
     const y = rect.top + rect.height / 2;
-    const id = particleCounter.current++;
-    setParticles(prev => [...prev, { x, y, id }]);
-    setTimeout(() => {
-      setParticles(prev => prev.filter(p => p.id !== id));
-    }, 1000);
+    // Spawn a few particles with staggered IDs
+    for (let i = 0; i < 4; i++) {
+      const id = particleCounter.current++;
+      setTimeout(() => {
+        setParticles(prev => [...prev, { x, y, id }]);
+        setTimeout(() => {
+          setParticles(prev => prev.filter(p => p.id !== id));
+        }, 600);
+      }, i * 50);
+    }
   }, []);
 
   const getChaosEventForClick = (clickNum: number): ChaosEvent => {
@@ -508,6 +494,11 @@ export function TheQuestion() {
     e.preventDefault();
     e.stopPropagation();
     
+    // Strong vibration feedback
+    if (navigator.vibrate) {
+      navigator.vibrate([200, 100, 200, 100, 200]);
+    }
+    
     // Only in confession mode does clicking this button trigger YES
     if (confessionMode) {
       finishGame();
@@ -520,15 +511,6 @@ export function TheQuestion() {
     
     // Track resistance in store
     incrementSpawn();
-    
-    // Spawn falling button
-    const vw = window.innerWidth;
-    const randomX = 50 + Math.random() * (vw - 150);
-    const newButton: SpawnedButton = {
-      id: spawnCounter.current++,
-      x: randomX
-    };
-    setSpawnedButtons(prev => [...prev, newButton]);
     
     // Cycle gaslight text
     setNoTextIndex(prev => (prev + 1) % GASLIGHT_TEXTS.length);
@@ -597,54 +579,45 @@ export function TheQuestion() {
     ? SENDER_UPDATES[senderUpdateIndex].replace('{name}', senderName)
     : `From ${senderName} 💌`;
 
+  // CSS-based buttons (no Framer Motion overhead)
   const yesButton = (
-    <motion.button
+    <button
       key="yes"
       onClick={handleYesClick}
-      whileHover={{ scale: 1.1 }}
-      whileTap={{ scale: 0.95 }}
-      className="jelly-btn flex-1 px-6 py-3 bg-gradient-to-r from-pink-500 to-rose-500 text-white rounded-full font-semibold shadow-lg"
+      className="jelly-btn flex-1 px-6 py-3 bg-gradient-to-r from-pink-500 to-rose-500 text-white rounded-full font-semibold shadow-lg 
+        transition-transform duration-150 hover:scale-110 active:scale-95"
     >
       {reverseMode && !confessionMode ? "NO 💔" : "YES 💕"}
-    </motion.button>
+    </button>
   );
 
   const noButton = (
-    <motion.button
+    <button
       key="no"
       onClick={handleNoInteraction}
-      whileHover={{ scale: Math.max(0.9, noButtonScale) }}
-      whileTap={{ scale: noButtonScale * 0.95 }}
-      animate={{ scale: noButtonScale }}
-      transition={{ type: 'spring', stiffness: 300, damping: 20 }}
-      className="jelly-btn flex-1 px-6 py-3 bg-gray-200 text-gray-700 rounded-full font-semibold"
+      className="jelly-btn flex-1 px-6 py-3 bg-gray-200 text-gray-700 rounded-full font-semibold
+        transition-all duration-200 hover:scale-95 active:scale-90"
       style={{ 
+        transform: `scale(${noButtonScale})`,
         minWidth: noButtonScale < 0.5 ? '40px' : '80px',
         fontSize: noButtonScale < 0.5 ? '10px' : '14px'
       }}
     >
       {confessionMode ? "I give up 🏳️" : (reverseMode ? "YES 💕" : "NO")}
-    </motion.button>
+    </button>
   );
 
   return (
-    <motion.div 
-      className={`min-h-screen w-full flex items-center justify-center p-4 overflow-auto ${isShaking ? 'animate-shake' : ''}`}
-      animate={isShaking ? { x: [0, -10, 10, -10, 10, 0] } : {}}
-      transition={{ duration: 0.4 }}
+    <div 
+      className={`min-h-screen w-full flex items-center justify-center px-4 pt-20 pb-8 overflow-auto ${isShaking ? 'animate-shake' : ''}`}
     >
-      {/* Falling YES buttons layer - mobile only */}
-      <div className="md:hidden">
-        <FallingYesButtons 
-          buttons={spawnedButtons} 
-          onYesClick={handleYesClick}
-        />
+      <div className="w-full max-w-md mx-auto">
+      {/* Breaking heart particles - CSS animated */}
+      <div className="pointer-events-none fixed inset-0 z-50">
+        {particles.map(p => (
+          <HeartParticle key={p.id} x={p.x} y={p.y} id={p.id} />
+        ))}
       </div>
-
-      {/* Breaking heart particles */}
-      {particles.map(p => (
-        <BreakingHearts key={p.id} x={p.x} y={p.y} heartKey={p.id} />
-      ))}
 
       {/* Chaos event modals */}
       <AnimatePresence>
@@ -657,67 +630,45 @@ export function TheQuestion() {
 
       {/* Main card */}
       <GlassCard>
-        <motion.div 
-          className="text-center space-y-6"
-          layout
-        >
+        <div className="text-center space-y-6">
           {/* Sender status */}
-          <motion.p 
-            key={displaySender}
-            initial={{ opacity: 0, y: -10 }}
-            animate={{ opacity: 1, y: 0 }}
-            className="text-sm opacity-70"
+          <p 
+            className="text-sm opacity-70 animate-fade-in"
             style={{ color: currentTheme.colors.text }}
           >
             {displaySender}
-          </motion.p>
+          </p>
 
           {/* Question */}
-          <motion.h2 
-            key={displayQuestion}
-            initial={{ opacity: 0, scale: 0.9 }}
-            animate={{ opacity: 1, scale: 1 }}
-            className="font-heading text-2xl md:text-3xl font-bold"
+          <h2 
+            className="font-heading text-2xl md:text-3xl font-bold animate-fade-in"
             style={{ color: currentTheme.colors.text }}
           >
             {displayQuestion}
-          </motion.h2>
+          </h2>
 
           {/* Gaslight text */}
-          <AnimatePresence mode="wait">
-            {clickCount > 0 && (
-              <motion.p
-                key={noTextIndex}
-                initial={{ opacity: 0, y: 10 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: -10 }}
-                className="text-lg text-pink-500"
-              >
-                {GASLIGHT_TEXTS[noTextIndex]}
-              </motion.p>
-            )}
-          </AnimatePresence>
+          {clickCount > 0 && (
+            <p
+              key={noTextIndex}
+              className="text-lg text-pink-500 animate-fade-in"
+            >
+              {GASLIGHT_TEXTS[noTextIndex]}
+            </p>
+          )}
 
           {/* Confession mode special text */}
           {confessionMode && (
-            <motion.p
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              className="text-sm text-gray-500 italic"
-            >
+            <p className="text-sm text-gray-500 italic animate-fade-in">
               Okay fine, I&apos;ll make it easy. Just click the white button 😊
-            </motion.p>
+            </p>
           )}
 
           {/* Reverse mode warning */}
           {reverseMode && !confessionMode && (
-            <motion.div
-              initial={{ opacity: 0, scale: 0.5 }}
-              animate={{ opacity: 1, scale: 1 }}
-              className="text-xs bg-yellow-100 text-yellow-800 px-3 py-1 rounded-full inline-block"
-            >
-              ⚠️ Don't trust the labels... ⚠️
-            </motion.div>
+            <div className="text-xs bg-yellow-100 text-yellow-800 px-3 py-1 rounded-full inline-block animate-bounce-in">
+              ⚠️ Don&apos;t trust the labels... ⚠️
+            </div>
           )}
 
           {/* Buttons */}
@@ -737,17 +688,16 @@ export function TheQuestion() {
 
           {/* Click counter easter egg */}
           {clickCount >= 10 && (
-            <motion.p
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 0.3 }}
-              className="text-xs"
+            <p
+              className="text-xs opacity-30"
               style={{ color: currentTheme.colors.text }}
             >
               Clicks: {clickCount} 😅
-            </motion.p>
+            </p>
           )}
-        </motion.div>
+        </div>
       </GlassCard>
-    </motion.div>
+      </div>
+    </div>
   );
 }

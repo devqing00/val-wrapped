@@ -68,7 +68,7 @@ export function AnimatedBackground() {
 
   return (
     <div 
-      className="fixed inset-0 -z-10 overflow-hidden"
+      className="fixed inset-0 -z-10 overflow-hidden pointer-events-none"
       style={{ background: currentTheme.gradients.background }}
     >
       {/* Gradient orbs */}

@@ -63,7 +63,7 @@ export default function TokenPage() {
   if (isValid === null) {
     return (
       <main 
-        className="min-h-dvh flex items-center justify-center"
+        className="min-h-screen flex items-center justify-center"
         style={{
           ...themeVars,
           background: currentTheme.gradients.background,
@@ -96,7 +96,7 @@ export default function TokenPage() {
 
   return (
     <main 
-      className="min-h-dvh overflow-hidden"
+      className="min-h-screen overflow-auto"
       style={{
         ...themeVars,
         background: currentTheme.gradients.background,

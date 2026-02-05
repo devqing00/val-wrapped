@@ -36,6 +36,7 @@ export function WrappedSlides({ onComplete }: WrappedSlidesProps) {
   const [poem, setPoem] = useState<string>('');
   const [sentiment, setSentiment] = useState<SentimentData | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [isTypingComplete, setIsTypingComplete] = useState(true);
   const containerRef = useRef<HTMLDivElement>(null);
   
   const { recipientName, senderName, startTime, endTime, spawnCount, theme, customMessage } = useStore();
@@ -185,6 +186,13 @@ export function WrappedSlides({ onComplete }: WrappedSlidesProps) {
     if (currentSlide < slides.length - 1) {
       setCurrentSlide((prev) => prev + 1);
       
+      // Check if next slide is the poem slide
+      if (slides[currentSlide + 1]?.id === 'poem') {
+        setIsTypingComplete(false);
+      } else {
+        setIsTypingComplete(true);
+      }
+      
       // Haptic feedback on mobile
       if (navigator.vibrate) {
         navigator.vibrate(30);
@@ -192,10 +200,14 @@ export function WrappedSlides({ onComplete }: WrappedSlidesProps) {
     } else {
       onComplete();
     }
-  }, [currentSlide, slides.length, onComplete]);
+  }, [currentSlide, slides.length, onComplete, slides]);
 
   // Handle tap/click to advance
   const handleTap = () => {
+    // Don't advance if poem is still being typed
+    if (!isTypingComplete) {
+      return;
+    }
     nextSlide();
   };
 
@@ -327,6 +339,7 @@ export function WrappedSlides({ onComplete }: WrappedSlidesProps) {
                   text={slides[currentSlide].subtitle || ''} 
                   speed={25}
                   className=""
+                  onComplete={() => setIsTypingComplete(true)}
                 />
               </motion.div>
             ) : (slides[currentSlide].statLabel || slides[currentSlide].subtitle) && (

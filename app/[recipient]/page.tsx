@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { useParams, useSearchParams } from 'next/navigation';
 import { AnimatePresence } from 'framer-motion';
 
@@ -13,11 +13,18 @@ import { WrappedSlides } from '../components/wrapped/WrappedSlides';
 import { getTheme, getThemeCSSVariables, ThemeId, themeList } from '../lib/themes';
 import { AnimatedBackground } from '../components/canvas/AnimatedBackground';
 import { Scene3D } from '../components/canvas/Scene3D';
+import { isMobileDevice } from '../lib/mobileOptimization';
 
 export default function RecipientPage() {
   const params = useParams();
   const searchParams = useSearchParams();
   const { stage, setRecipientName, setTheme, setStage, theme } = useStore();
+  const [isMobile, setIsMobile] = useState(false);
+
+  // Check if mobile on mount
+  useEffect(() => {
+    setIsMobile(isMobileDevice());
+  }, []);
 
   // Parse recipient name and theme from URL parameters
   useEffect(() => {
@@ -50,8 +57,8 @@ export default function RecipientPage() {
         background: currentTheme.gradients.background,
       } as React.CSSProperties}
     >
-      {/* 3D Background */}
-      <Scene3D />
+      {/* 3D Background - Desktop only */}
+      {!isMobile && <Scene3D />}
       
       {/* Animated Background */}
       <AnimatedBackground />

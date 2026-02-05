@@ -37,21 +37,25 @@ export function getAnimationSettings() {
       bubbleCount: 0,
       orbAnimations: false,
       floatingElements: 0,
+      sparkleCount: 0,
       transitionDuration: 0.1,
       springStiffness: 500,
       springDamping: 50,
+      enable3D: false,
     };
   }
   
   if (isMobile) {
     return {
-      particleCount: 15,      // Reduced from 30
-      bubbleCount: 10,        // Reduced from 20
-      orbAnimations: true,
-      floatingElements: 8,    // Reduced from 15
-      transitionDuration: 0.3,
-      springStiffness: 300,
-      springDamping: 25,
+      particleCount: 30,      // Keep confetti huge!
+      bubbleCount: 20,        // Full bubbles
+      orbAnimations: false,   // Disable orb animations on mobile
+      floatingElements: 3,    // Very few floating elements
+      sparkleCount: 50,       // Full sparkles
+      transitionDuration: 0.2,
+      springStiffness: 400,
+      springDamping: 30,
+      enable3D: false,        // Disable 3D on mobile
     };
   }
   
@@ -61,9 +65,11 @@ export function getAnimationSettings() {
     bubbleCount: 20,
     orbAnimations: true,
     floatingElements: 15,
+    sparkleCount: 50,
     transitionDuration: 0.5,
     springStiffness: 260,
     springDamping: 20,
+    enable3D: true,
   };
 }
 
