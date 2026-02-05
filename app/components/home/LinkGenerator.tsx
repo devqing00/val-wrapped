@@ -90,8 +90,8 @@ export function LinkGenerator() {
   const handleSendWhatsApp = () => {
     if (!generatedLink) return;
     
-    // Clean phone number (remove spaces, dashes, etc.)
-    const cleanPhone = recipientPhone.replace(/[\s\-\(\)]/g, '');
+    // Clean phone number (remove spaces, dashes, parentheses, and plus signs)
+    const cleanPhone = recipientPhone.replace(/[\s\-\(\)\+]/g, '');
     const message = `Hey ${recipientName}! 💕 Someone has something special for you... Open this: ${generatedLink}`;
     
     // WhatsApp API URL

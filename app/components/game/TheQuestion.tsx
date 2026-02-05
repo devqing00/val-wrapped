@@ -1,7 +1,6 @@
 'use client';
 
 import { useRef, useState, useCallback, useEffect, useMemo } from 'react';
-import { AnimatePresence, motion } from 'framer-motion';
 import { GlassCard } from '../ui/GlassCard';
 import { useStore } from '../../store/useStore';
 import { DecryptedText } from '../ui/DecryptedText';
@@ -93,12 +92,7 @@ const HeartParticle = ({ x, y, id }: { x: number; y: number; id: number }) => {
 
 // Captcha modal
 const CaptchaChallenge = ({ onSolve, onSkip }: { onSolve: () => void; onSkip: () => void }) => (
-  <motion.div
-    initial={{ opacity: 0, scale: 0.8 }}
-    animate={{ opacity: 1, scale: 1 }}
-    exit={{ opacity: 0, scale: 0.8 }}
-    className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm px-4"
-  >
+  <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm px-4 animate-modal-in">
     <div className="bg-white rounded-xl p-4 max-w-xs w-full text-center shadow-2xl relative">
       <button
         onClick={onSkip}
@@ -130,7 +124,7 @@ const CaptchaChallenge = ({ onSolve, onSkip }: { onSolve: () => void; onSkip: ()
         YES ✓
       </button>
     </div>
-  </motion.div>
+  </div>
 );
 
 // Math problem modal
@@ -153,12 +147,7 @@ const MathChallenge = ({ onSolve, onWrong, onSkip }: { onSolve: () => void; onWr
   };
 
   return (
-    <motion.div
-      initial={{ opacity: 0, scale: 0.8 }}
-      animate={{ opacity: 1, scale: 1 }}
-      exit={{ opacity: 0, scale: 0.8 }}
-      className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm px-4"
-    >
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm px-4 animate-modal-in">
       <div className="bg-white rounded-xl p-4 max-w-xs w-full text-center shadow-2xl relative">
         <button
           onClick={onSkip}
@@ -168,17 +157,11 @@ const MathChallenge = ({ onSolve, onWrong, onSkip }: { onSolve: () => void; onWr
         </button>
         <h3 className="text-sm font-bold text-gray-800 mb-3">🧮 Quick Math!</h3>
         <div className="text-3xl font-bold mb-2">1 + 1 = ?</div>
-        <AnimatePresence>
-          {showHint && (
-            <motion.p 
-              initial={{ opacity: 0, y: -10 }}
-              animate={{ opacity: 1, y: 0 }}
-              className="text-xs text-pink-500 mb-3"
-            >
-              (Hint: The answer is also what you should click 😉)
-            </motion.p>
-          )}
-        </AnimatePresence>
+        {showHint && (
+          <p className="text-xs text-pink-500 mb-3 animate-fade-in">
+            (Hint: The answer is also what you should click 😉)
+          </p>
+        )}
         <input
           type="text"
           value={answer}
@@ -195,7 +178,7 @@ const MathChallenge = ({ onSolve, onWrong, onSkip }: { onSolve: () => void; onWr
           Submit 📝
         </button>
       </div>
-    </motion.div>
+    </div>
   );
 };
 
@@ -230,12 +213,9 @@ const FakeCrash = ({ onDismiss }: { onDismiss: () => void }) => {
   };
 
   return (
-    <motion.div
-      initial={{ opacity: 0 }}
-      animate={{ opacity: 1 }}
-      exit={{ opacity: 0 }}
+    <div
       onClick={handleClick}
-      className={`fixed inset-0 z-50 bg-[#0078D7] flex items-center justify-center px-4 ${canDismiss ? 'cursor-pointer' : 'cursor-wait'}`}
+      className={`fixed inset-0 z-50 bg-[#0078D7] flex items-center justify-center px-4 animate-fade-in ${canDismiss ? 'cursor-pointer' : 'cursor-wait'}`}
     >
       <div className="text-white p-6 max-w-md">
         <div className="text-[80px] md:text-[120px] leading-none mb-4">:(</div>
@@ -256,16 +236,12 @@ const FakeCrash = ({ onDismiss }: { onDismiss: () => void }) => {
           <p className="font-mono text-xs">What failed: heart.exe</p>
         </div>
         {canDismiss && (
-          <motion.p 
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            className="mt-6 text-xs opacity-60"
-          >
+          <p className="mt-6 text-xs opacity-60 animate-fade-in">
             Click anywhere to recover... (or just say YES 💕)
-          </motion.p>
+          </p>
         )}
       </div>
-    </motion.div>
+    </div>
   );
 };
 
@@ -285,12 +261,7 @@ const HackedScreen = ({ onDismiss }: { onDismiss: () => void }) => {
   }, []);
 
   return (
-    <motion.div
-      initial={{ opacity: 0 }}
-      animate={{ opacity: 1 }}
-      exit={{ opacity: 0 }}
-      className="fixed inset-0 z-50"
-    >
+    <div className="fixed inset-0 z-50 animate-fade-in">
       {/* FaultyTerminal Background */}
       <div className="absolute inset-0">
         <FaultyTerminal 
@@ -309,20 +280,12 @@ const HackedScreen = ({ onDismiss }: { onDismiss: () => void }) => {
       
       {/* Content */}
       <div className="relative z-10 flex flex-col items-center justify-center h-full p-4 text-center">
-        <motion.div 
-          className="text-green-400 text-[10px] md:text-xs font-mono mb-3 opacity-80"
-          animate={{ opacity: [0.5, 1, 0.5] }}
-          transition={{ repeat: Infinity, duration: 2 }}
-        >
+        <div className="text-green-400 text-[10px] md:text-xs font-mono mb-3 opacity-80 animate-pulse-fast">
           {stage >= 0 && "[ SYSTEM BREACH DETECTED ]"}
-        </motion.div>
+        </div>
         
         {stage >= 1 && (
-          <motion.div
-            initial={{ opacity: 0, y: 10 }}
-            animate={{ opacity: 1, y: 0 }}
-            className="text-green-500 text-xs md:text-sm font-mono mb-2"
-          >
+          <div className="text-green-500 text-xs md:text-sm font-mono mb-2 animate-fade-in">
             <DecryptedText 
               text="ACCESSING HEART DATABASE..."
               speed={30}
@@ -331,15 +294,11 @@ const HackedScreen = ({ onDismiss }: { onDismiss: () => void }) => {
               className="text-green-500"
               encryptedClassName="text-green-700"
             />
-          </motion.div>
+          </div>
         )}
         
         {stage >= 2 && (
-          <motion.div
-            initial={{ opacity: 0, y: 10 }}
-            animate={{ opacity: 1, y: 0 }}
-            className="text-green-400 text-sm md:text-base font-mono mb-2"
-          >
+          <div className="text-green-400 text-sm md:text-base font-mono mb-2 animate-fade-in">
             <DecryptedText 
               text="FIREWALL BYPASSED... ✓"
               speed={25}
@@ -348,15 +307,11 @@ const HackedScreen = ({ onDismiss }: { onDismiss: () => void }) => {
               className="text-green-400"
               encryptedClassName="text-green-600"
             />
-          </motion.div>
+          </div>
         )}
         
         {stage >= 3 && (
-          <motion.div
-            initial={{ opacity: 0, scale: 0.8 }}
-            animate={{ opacity: 1, scale: 1 }}
-            className="text-green-300 text-base md:text-xl font-mono font-bold mb-4"
-          >
+          <div className="text-green-300 text-base md:text-xl font-mono font-bold mb-4 animate-bounce-in">
             <DecryptedText 
               text="[LOVE.exe INJECTED SUCCESSFULLY]"
               speed={20}
@@ -365,15 +320,13 @@ const HackedScreen = ({ onDismiss }: { onDismiss: () => void }) => {
               className="text-green-300"
               encryptedClassName="text-green-500"
             />
-          </motion.div>
+          </div>
         )}
         
         {showButton && (
-          <motion.button
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
+          <button
             onClick={onDismiss}
-            className="jelly-btn px-6 py-2 text-sm bg-green-500 text-black rounded-lg font-mono font-bold hover:bg-green-400 transition-colors"
+            className="jelly-btn px-6 py-2 text-sm bg-green-500 text-black rounded-lg font-mono font-bold hover:bg-green-400 transition-colors animate-fade-in"
           >
             <span className="mr-2">&gt;</span>
             <DecryptedText 
@@ -384,18 +337,14 @@ const HackedScreen = ({ onDismiss }: { onDismiss: () => void }) => {
               className="text-black"
               encryptedClassName="text-green-800"
             />
-          </motion.button>
+          </button>
         )}
         
-        <motion.p 
-          className="mt-4 text-green-600 text-[10px] font-mono opacity-60"
-          animate={{ opacity: [0.3, 0.6, 0.3] }}
-          transition={{ repeat: Infinity, duration: 3 }}
-        >
+        <p className="mt-4 text-green-600 text-[10px] font-mono opacity-60 animate-pulse-slow">
           Resistance is futile. Love always finds a way. 💚
-        </motion.p>
+        </p>
       </div>
-    </motion.div>
+    </div>
   );
 };
 
@@ -407,23 +356,14 @@ const Jumpscare = ({ onDismiss }: { onDismiss: () => void }) => {
   }, [onDismiss]);
 
   return (
-    <motion.div
-      initial={{ scale: 5, opacity: 0 }}
-      animate={{ scale: 1, opacity: 1 }}
-      exit={{ scale: 0, opacity: 0 }}
-      className="fixed inset-0 z-50 bg-pink-500 flex items-center justify-center px-4"
-    >
+    <div className="fixed inset-0 z-50 bg-pink-500 flex items-center justify-center px-4 animate-jumpscare">
       <div className="text-center">
-        <motion.div 
-          className="text-[100px]"
-          animate={{ rotate: [0, -10, 10, -10, 10, 0] }}
-          transition={{ duration: 0.5 }}
-        >
+        <div className="text-[100px] animate-shake-rotate">
           💕
-        </motion.div>
+        </div>
         <div className="text-white text-2xl font-bold">SAY YES ALREADY!</div>
       </div>
-    </motion.div>
+    </div>
   );
 };
 
@@ -620,13 +560,11 @@ export function TheQuestion() {
       </div>
 
       {/* Chaos event modals */}
-      <AnimatePresence>
-        {chaosEvent === 'captcha' && <CaptchaChallenge onSolve={handleChallengeComplete} onSkip={handleDismissEvent} />}
-        {chaosEvent === 'math' && <MathChallenge onSolve={handleChallengeComplete} onWrong={handleChallengeFail} onSkip={handleDismissEvent} />}
-        {chaosEvent === 'fake-crash' && <FakeCrash onDismiss={handleDismissEvent} />}
-        {chaosEvent === 'jumpscare' && <Jumpscare onDismiss={handleDismissEvent} />}
-        {chaosEvent === 'hacked' && <HackedScreen onDismiss={handleDismissEvent} />}
-      </AnimatePresence>
+      {chaosEvent === 'captcha' && <CaptchaChallenge onSolve={handleChallengeComplete} onSkip={handleDismissEvent} />}
+      {chaosEvent === 'math' && <MathChallenge onSolve={handleChallengeComplete} onWrong={handleChallengeFail} onSkip={handleDismissEvent} />}
+      {chaosEvent === 'fake-crash' && <FakeCrash onDismiss={handleDismissEvent} />}
+      {chaosEvent === 'jumpscare' && <Jumpscare onDismiss={handleDismissEvent} />}
+      {chaosEvent === 'hacked' && <HackedScreen onDismiss={handleDismissEvent} />}
 
       {/* Main card */}
       <GlassCard>

@@ -274,3 +274,105 @@ body {
 .animate-shake {
   animation: shake 0.5s ease-in-out;
 }
+
+/* Modal Animations */
+@keyframes modal-fade-in {
+  from {
+    opacity: 0;
+    transform: scale(0.8);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+.animate-modal-in {
+  animation: modal-fade-in 0.2s ease-out forwards;
+}
+
+@keyframes jumpscare {
+  from {
+    opacity: 0;
+    transform: scale(5);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+.animate-jumpscare {
+  animation: jumpscare 0.3s ease-out forwards;
+}
+
+@keyframes shake-rotate {
+  0%, 100% { transform: rotate(0deg); }
+  20% { transform: rotate(-10deg); }
+  40% { transform: rotate(10deg); }
+  60% { transform: rotate(-10deg); }
+  80% { transform: rotate(10deg); }
+}
+
+.animate-shake-rotate {
+  animation: shake-rotate 0.5s ease-in-out;
+}
+
+@keyframes pulse-opacity {
+  0%, 100% { opacity: 0.3; }
+  50% { opacity: 0.6; }
+}
+
+.animate-pulse-slow {
+  animation: pulse-opacity 3s ease-in-out infinite;
+}
+
+.animate-pulse-fast {
+  animation: pulse-opacity 2s ease-in-out infinite;
+}
+
+/* Landing Page Animations */
+@keyframes envelope-float {
+  0%, 100% { transform: translateY(0) rotate(0deg); }
+  25% { transform: translateY(-10px) rotate(-5deg); }
+  50% { transform: translateY(0) rotate(0deg); }
+  75% { transform: translateY(-10px) rotate(5deg); }
+}
+
+.animate-envelope-float {
+  animation: envelope-float 2s ease-in-out infinite;
+}
+
+@keyframes heart-pulse-left {
+  0%, 100% { transform: scale(1) rotate(0deg); }
+  50% { transform: scale(1.2) rotate(10deg); }
+}
+
+.animate-heart-left {
+  animation: heart-pulse-left 2s ease-in-out infinite;
+}
+
+@keyframes heart-pulse-right {
+  0%, 100% { transform: scale(1) rotate(0deg); }
+  50% { transform: scale(1.2) rotate(-10deg); }
+}
+
+.animate-heart-right {
+  animation: heart-pulse-right 2s ease-in-out infinite 0.5s;
+}
+
+@keyframes landing-entry {
+  from {
+    opacity: 0;
+    transform: scale(0.8) translateY(50px);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+}
+
+.animate-landing-entry {
+  animation: landing-entry 0.5s ease-out forwards 0.2s;
+  opacity: 0;
+}

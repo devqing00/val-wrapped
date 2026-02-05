@@ -6,6 +6,7 @@ import { useStore, getHesitationTime, getStubbornnessLevel } from '../../store/u
 import { getTheme } from '../../lib/themes';
 import { SecretMessage } from './SecretMessage';
 import { TypingText } from '../ui/TypingText';
+import { getRandomPersonality } from '../../lib/personalityLibrary';
 
 interface Slide {
   id: string;
@@ -148,7 +149,7 @@ export function WrappedSlides({ onComplete }: WrappedSlidesProps) {
     {
       id: 'personality',
       title: stubbornnessLevel,
-      subtitle: sentiment?.description || 'Your resistance was noted... and attractive 😘',
+      subtitle: getRandomPersonality(spawnCount),
       emoji: sentiment?.emoji || '✨',
       gradient: 'from-cyan-500 via-purple-500 to-pink-500',
     },
